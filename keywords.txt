@@ -1,0 +1,41 @@
+#######################################
+# Syntax Coloring Map For
+# esp basic wifi
+#######################################
+
+#######################################
+# Data Types (KEYWORD1)
+#######################################
+
+BasicWiFi   KEYWORD1
+Config   KEYWORD1
+OnConnectHandler   KEYWORD1
+OnGotIPHandler   KEYWORD1
+OnDisconnectHandler   KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setConfig  KEYWORD2
+getConfig  KEYWORD2
+addLogger  KEYWORD2
+setup  KEYWORD2
+setWaitingFunction   KEYWORD2
+waitForConnection   KEYWORD2
+onConnected   KEYWORD2
+onGotIP   KEYWORD2
+onDisconnected   KEYWORD2
+connect   KEYWORD2
+reconnect   KEYWORD2
+disconnect   KEYWORD2
+
+#######################################
+# (KEYWORD3)
+#######################################
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
