@@ -89,6 +89,7 @@ void BasicWiFi::addLogger(void (*logger)(String logLevel, String msg)) {
 	_logger = logger;
 }
 void BasicWiFi::setup() {
+	WiFi.setAutoReconnect(false);
 	WiFi.disconnect(true, true);
 	if (_staticIP) {
 		WiFi.config(_IP, _gateway, _subnet, _dns1, _dns2);
