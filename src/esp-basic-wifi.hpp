@@ -109,6 +109,7 @@ class BasicWiFi {
 	const char* _wifiStatus[8] = {"IDLE_STATUS", "NO_SSID_AVAIL", "SCAN_COMPLETED", "CONNECTED", "CONNECT_FAILED", "CONNECTION_LOST", "WRONG_PASSWORD", "DISCONNECTED"};
 #endif
 	bool _connected;
+	static bool _shouldBeConnected;
 	std::vector<OnConnectHandler> _onConnectHandlers;
 	std::vector<OnGotIPHandler> _onGotIPHandlers;
 	std::vector<OnDisconnectHandler> _onDisconnectHandlers;

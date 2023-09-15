@@ -7,6 +7,7 @@ Ticker _wifiReconnectTimer;
 Ticker _wifiDisconnectDelay;
 String BasicWiFi::_ssid;
 String BasicWiFi::_pass;
+bool BasicWiFi::_shouldBeConnected = false;
 
 BasicWiFi::BasicWiFi(const char* ssid, const char* pass)
     : _mode(DEFAULT_WIFI_MODE)
@@ -102,6 +103,7 @@ void BasicWiFi::setup() {
 	WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL);
 #endif
 	WiFi.begin(_ssid, _pass);
+	_shouldBeConnected = true;
 #ifdef ARDUINO_ARCH_ESP32
 	WiFi.onEvent([&](WiFiEvent_t event, WiFiEventInfo_t info) { _onConnected(event, info); }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
 	WiFi.onEvent([&](WiFiEvent_t event, WiFiEventInfo_t info) { _onGotIP(event, info); }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
@@ -134,6 +136,7 @@ uint8_t BasicWiFi::waitForConnection(int waitTime) {
 }
 void BasicWiFi::connect() {
 	WiFi.begin(_ssid, _pass);
+	_shouldBeConnected = true;
 }
 void BasicWiFi::reconnect(uint8_t reconnectDelay) {
 	disconnect();
@@ -143,9 +146,8 @@ void BasicWiFi::reconnect(uint8_t reconnectDelay) {
 	});
 }
 void BasicWiFi::disconnect() {
+	_wifiReconnectTimer.detach();
 	if (_connected) {
-		_connected = false;
-		_wifiReconnectTimer.detach();
 		_wifiDisconnectDelay.once(DISCONNECT_DELAY, []() {
 			BASIC_WIFI_PRINTLN("disconnecting");
 			WiFi.disconnect(true);
@@ -153,6 +155,7 @@ void BasicWiFi::disconnect() {
 	} else {
 		WiFi.disconnect(true);
 	}
+	_shouldBeConnected = false;
 }
 
 uint8_t BasicWiFi::_checkConnection() {
@@ -184,9 +187,9 @@ void BasicWiFi::_onGotIP(GOT_IP_HANDLER_ARGS) {
 	for (const auto& handler : _onGotIPHandlers) handler(HANDLER_ARGS);
 }
 void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
+	_connected = false;
 	BASIC_WIFI_PRINTLN("WiFi disconnected");
 	if (_logger != nullptr) { (*_logger)("wifi", "WiFi disconnected [" + String(_wifiStatus[WiFi.status()]) + "]"); }
-	if (_connected) { reconnect(AUTO_RECONNECT_DELAY); }
-	_connected = false;
+	if (_shouldBeConnected) { reconnect(AUTO_RECONNECT_DELAY); }
 	for (const auto& handler : _onDisconnectHandlers) handler(HANDLER_ARGS);
 }
