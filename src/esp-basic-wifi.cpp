@@ -158,6 +158,24 @@ void BasicWiFi::disconnect() {
 	_shouldBeConnected = false;
 }
 
+void BasicWiFi::addAccessPoint(const AccessPoint& accessPoint) {
+	_accessPointsMap.insert(accessPoint);
+}
+void BasicWiFi::addAccessPoints(const AccessPoints& accessPoints) {
+	for (auto const& point : accessPoints) {
+		_accessPointsMap.insert(point);
+	}
+}
+void BasicWiFi::setAccessPoints(const AccessPoints& accessPoints) {
+	_accessPointsMap = accessPoints;
+}
+String BasicWiFi::accessPointName(const String& bssidStr) {
+	if (_accessPointsMap.count(bssidStr) > 0) {
+		return _accessPointsMap.at(bssidStr);
+	}
+	return bssidStr;
+}
+
 uint8_t BasicWiFi::_checkConnection() {
 	IPAddress buffer;
 	BASIC_WIFI_PRINT("checking DNS server");
@@ -176,7 +194,7 @@ uint8_t BasicWiFi::_checkConnection() {
 }
 void BasicWiFi::_onConnected(CONNECTED_HANDLER_ARGS) {
 	BASIC_WIFI_PRINTLN("WiFi connected!\n SSID: " + WiFi.SSID());
-	if (_logger != nullptr) { (*_logger)("wifi", "WiFi connected to: " + WiFi.SSID() + " [" + WiFi.BSSIDstr() + "]"); }
+	if (_logger != nullptr) { (*_logger)("wifi", "WiFi connected to: " + WiFi.SSID() + " [AP: " + accessPointName() + "]"); }
 	for (const auto& handler : _onConnectHandlers) handler(HANDLER_ARGS);
 }
 void BasicWiFi::_onGotIP(GOT_IP_HANDLER_ARGS) {

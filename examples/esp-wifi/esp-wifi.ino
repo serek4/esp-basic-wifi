@@ -5,9 +5,17 @@
 
 BasicWiFi wifi(WIFI_SSID, WIFI_PASS);
 
+AccessPoint mainAP = {"FF:FF:FF:FF:FF:FF", "main AP"};
+AccessPoint secondAP = {"EE:EE:EE:EE:EE:EE", "second AP"};
+// AccessPoints accessPointsMap = {mainAP, secondAP};
+
 void setup() {
 	Serial.begin(115200);
 	Serial.println();
+	wifi.addAccessPoint(mainAP);
+	wifi.addAccessPoint(secondAP);
+	// wifi.addAccessPoints(accessPointsMap);
+	// wifi.setAccessPoints(accessPointsMap);
 	wifi.onConnected(handleWiFiConnected);
 	wifi.onGotIP(handleWiFiGotIP);
 	wifi.onDisconnected(handleWiFiDisconnected);

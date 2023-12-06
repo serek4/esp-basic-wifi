@@ -8,6 +8,7 @@
 #include <Ticker.h>
 #include <esp-basic-time.hpp>
 #include <functional>
+#include <map>
 #include <vector>
 
 // #define BASIC_WIFI_DEBUG
@@ -50,6 +51,8 @@
 #define HANDLER_ARGS evt
 #endif
 
+using AccessPoint = std::pair<String, String>;
+using AccessPoints = std::map<String, String>;
 
 class BasicWiFi {
   public:
@@ -90,6 +93,10 @@ class BasicWiFi {
 	static void connect();
 	void reconnect(uint8_t reconnectDelay = DEFAULT_RECONNECT_DELAY);
 	void disconnect();
+	void addAccessPoint(const AccessPoint& accessPoint);
+	void addAccessPoints(const AccessPoints& accessPoints);
+	void setAccessPoints(const AccessPoints& accessPoints);
+	String accessPointName(const String& bssidStr = WiFi.BSSIDstr());
 
   private:
 	static String _ssid;
@@ -103,6 +110,8 @@ class BasicWiFi {
 	IPAddress _dns2;
 	void (*_connectingIndicator)(u_long onTime, u_long offTime);
 	void (*_logger)(String logLevel, String msg);
+
+	AccessPoints _accessPointsMap;    // BSSIDstr, access point name
 #ifdef ARDUINO_ARCH_ESP32
 	const char* _wifiStatus[7] = {"IDLE_STATUS", "NO_SSID_AVAIL", "SCAN_COMPLETED", "CONNECTED", "CONNECT_FAILED", "CONNECTION_LOST", "DISCONNECTED"};
 #elif defined(ARDUINO_ARCH_ESP8266)
