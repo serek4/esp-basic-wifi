@@ -12,7 +12,7 @@ bool BasicWiFi::_shouldBeConnected = false;
 BasicWiFi::BasicWiFi(const char* ssid, const char* pass)
     : _mode(DEFAULT_WIFI_MODE)
     , _staticIP(false)
-    , _connected(false)
+    , _status(wifi_idle)
     , _connectingIndicator(nullptr)
     , _logger(nullptr) {
 	_ssid = ssid;
@@ -21,7 +21,7 @@ BasicWiFi::BasicWiFi(const char* ssid, const char* pass)
 BasicWiFi::BasicWiFi(const char* ssid, const char* pass, int mode)
     : _mode(static_cast<WiFiMode_t>(mode))
     , _staticIP(false)
-    , _connected(false)
+    , _status(wifi_idle)
     , _connectingIndicator(nullptr)
     , _logger(nullptr) {
 	_ssid = ssid;
@@ -30,7 +30,7 @@ BasicWiFi::BasicWiFi(const char* ssid, const char* pass, int mode)
 BasicWiFi::BasicWiFi(const char* ssid, const char* pass, int mode, const char* IP, const char* subnet, const char* gateway, const char* dns1, const char* dns2)
     : _mode(static_cast<WiFiMode_t>(mode))
     , _staticIP(true)
-    , _connected(false)
+    , _status(wifi_idle)
     , _connectingIndicator(nullptr)
     , _logger(nullptr) {
 	_ssid = ssid;
@@ -117,10 +117,10 @@ void BasicWiFi::setup() {
 void BasicWiFi::setWaitingFunction(void (*connectingIndicator)(u_long onTime, u_long offTime)) {
 	_connectingIndicator = connectingIndicator;
 }
-uint8_t BasicWiFi::waitForConnection(int waitTime) {
+int8_t BasicWiFi::waitForConnection(int waitTime) {
 	BASIC_WIFI_PRINT("Waiting for WiFi connection");
 	u_long startWaitingAt = millis();
-	while (WiFi.status() != WL_CONNECTED) {
+	while (_status < wifi_got_ip) {
 		BASIC_WIFI_PRINT(".");
 		if (_connectingIndicator == nullptr) {
 			delay(WIFI_NO_BLINK);
@@ -129,10 +129,10 @@ uint8_t BasicWiFi::waitForConnection(int waitTime) {
 		}
 		if (millis() - startWaitingAt > waitTime * 1000) {
 			BASIC_WIFI_PRINTLN("Can't connect to WiFi!");
-			return connection_fail;
+			return wifi_connection_fail;
 		}
 	}
-	return _checkConnection();
+	return _status;
 }
 void BasicWiFi::connect() {
 	WiFi.begin(_ssid, _pass);
@@ -147,7 +147,7 @@ void BasicWiFi::reconnect(uint8_t reconnectDelay) {
 }
 void BasicWiFi::disconnect() {
 	_wifiReconnectTimer.detach();
-	if (_connected) {
+	if (_status >= wifi_connected) {
 		_wifiDisconnectDelay.once(DISCONNECT_DELAY, []() {
 			BASIC_WIFI_PRINTLN("disconnecting");
 			WiFi.disconnect(true);
@@ -176,36 +176,37 @@ String BasicWiFi::accessPointName(const String& bssidStr) {
 	return bssidStr;
 }
 
-uint8_t BasicWiFi::_checkConnection() {
+bool BasicWiFi::checkDNS(const char* hostname) {
 	IPAddress buffer;
 	BASIC_WIFI_PRINT("checking DNS server");
 	int retry = 0;
-	while (WiFi.hostByName("google.com", buffer) == 0) {
+	while (WiFi.hostByName(hostname, buffer) == 0) {
 		BASIC_WIFI_PRINT(".");
 		delay(DNS_CHECK_RETRY_DELAY);
 		retry++;
 		if (retry > DNS_CHECK_RETRY) {
 			BASIC_WIFI_PRINTLN("DNS does not work!");
-			return dns_fail;
+			return false;
 		}
 	}
 	BASIC_WIFI_PRINTLN(" OK!");
-	return connected;
+	return true;
 }
 void BasicWiFi::_onConnected(CONNECTED_HANDLER_ARGS) {
 	BASIC_WIFI_PRINTLN("WiFi connected!\n SSID: " + WiFi.SSID());
 	if (_logger != nullptr) { (*_logger)("wifi", "WiFi connected to: " + WiFi.SSID() + " [AP: " + accessPointName() + "]"); }
+	_status = wifi_connected;
 	for (const auto& handler : _onConnectHandlers) handler(HANDLER_ARGS);
 }
 void BasicWiFi::_onGotIP(GOT_IP_HANDLER_ARGS) {
-	_connected = true;
+	_status = wifi_got_ip;
 	_wifiReconnectTimer.detach();
 	BASIC_WIFI_PRINTLN(" IP:   " + WiFi.localIP().toString());
 	if (_logger != nullptr) { (*_logger)("wifi", "got IP [" + (WiFi.localIP()).toString() + "]"); }
 	for (const auto& handler : _onGotIPHandlers) handler(HANDLER_ARGS);
 }
 void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
-	_connected = false;
+	_status = wifi_disconnected;
 	BASIC_WIFI_PRINTLN("WiFi disconnected");
 	if (_logger != nullptr) { (*_logger)("wifi", "WiFi disconnected [" + String(_wifiStatus[WiFi.status()]) + "]"); }
 	if (_shouldBeConnected) { reconnect(AUTO_RECONNECT_DELAY); }

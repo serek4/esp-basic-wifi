@@ -60,9 +60,11 @@ class BasicWiFi {
 	typedef std::function<void(GOT_IP_HANDLER_ARGS)> OnGotIPHandler;
 	typedef std::function<void(DISCONNECTED_HANDLER_ARGS)> OnDisconnectHandler;
 	enum Status {
-		connected,
-		dns_fail,
-		connection_fail,
+		wifi_idle = -2,
+		wifi_connection_fail,
+		wifi_disconnected,
+		wifi_connected,
+		wifi_got_ip,
 	};
 	struct Config {
 		String ssid;
@@ -86,7 +88,8 @@ class BasicWiFi {
 	void addLogger(void (*logger)(String logLevel, String msg));
 	void setup();
 	void setWaitingFunction(void (*connectingIndicator)(u_long onTime, u_long offTime));
-	uint8_t waitForConnection(int waitTime = DEFAULT_CONNECTION_WAIT_TIME);
+	int8_t waitForConnection(int waitTime = DEFAULT_CONNECTION_WAIT_TIME);
+	bool checkDNS(const char* hostname = "google.com");
 	void onConnected(const OnConnectHandler& handler);
 	void onGotIP(const OnGotIPHandler& handler);
 	void onDisconnected(const OnDisconnectHandler& handler);
@@ -117,13 +120,12 @@ class BasicWiFi {
 #elif defined(ARDUINO_ARCH_ESP8266)
 	const char* _wifiStatus[8] = {"IDLE_STATUS", "NO_SSID_AVAIL", "SCAN_COMPLETED", "CONNECTED", "CONNECT_FAILED", "CONNECTION_LOST", "WRONG_PASSWORD", "DISCONNECTED"};
 #endif
-	bool _connected;
+	int8_t _status;
 	static bool _shouldBeConnected;
 	std::vector<OnConnectHandler> _onConnectHandlers;
 	std::vector<OnGotIPHandler> _onGotIPHandlers;
 	std::vector<OnDisconnectHandler> _onDisconnectHandlers;
 
-	uint8_t _checkConnection();
 	void _onConnected(CONNECTED_HANDLER_ARGS);
 	void _onGotIP(GOT_IP_HANDLER_ARGS);
 	void _onDisconnected(DISCONNECTED_HANDLER_ARGS);
