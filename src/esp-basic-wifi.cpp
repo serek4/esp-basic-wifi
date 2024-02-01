@@ -18,20 +18,6 @@ BasicWiFi::BasicWiFi(const char* ssid, const char* pass)
 	_ssid = ssid;
 	_pass = pass;
 }
-BasicWiFi::BasicWiFi(const char* ssid, const char* pass, const char* IP, const char* subnet, const char* gateway, const char* dns1, const char* dns2)
-    : _mode(DEFAULT_WIFI_MODE)
-    , _staticIP(true)
-    , _status(wifi_idle)
-    , _connectingIndicator(nullptr)
-    , _logger(nullptr) {
-	_ssid = ssid;
-	_pass = pass;
-	(_IP).fromString(IP);
-	(_subnet).fromString(subnet);
-	(_gateway).fromString(gateway);
-	(_dns1).fromString(dns1);
-	(_dns2).fromString(dns2);
-}
 
 void BasicWiFi::onConnected(const OnConnectHandler& handler) {
 	_onConnectHandlers.push_back(handler);
@@ -82,6 +68,22 @@ void BasicWiFi::addLogger(void (*logger)(String logLevel, String msg)) {
 }
 void BasicWiFi::setMode(WiFiMode_t mode) {
 	_mode = mode;
+}
+void BasicWiFi::setStaticIP(IPAddress IP, IPAddress subnet, IPAddress gateway, IPAddress dns1, IPAddress dns2) {
+	_staticIP = true;
+	_IP = IP;
+	_subnet = subnet;
+	_gateway = gateway;
+	_dns1 = dns1;
+	_dns2 = dns2;
+}
+void BasicWiFi::setStaticIP(const char* IP, const char* subnet, const char* gateway, const char* dns1, const char* dns2) {
+	_staticIP = true;
+	_IP.fromString(IP);
+	_subnet.fromString(subnet);
+	_gateway.fromString(gateway);
+	_dns1.fromString(dns1);
+	_dns2.fromString(dns2);
 }
 void BasicWiFi::setup() {
 	WiFi.persistent(false);
