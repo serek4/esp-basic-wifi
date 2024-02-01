@@ -90,13 +90,12 @@ void BasicWiFi::addLogger(void (*logger)(String logLevel, String msg)) {
 	_logger = logger;
 }
 void BasicWiFi::setup() {
+	WiFi.persistent(false);
 	WiFi.setAutoReconnect(false);
-	WiFi.disconnect(true, true);
 	if (_staticIP) {
 		WiFi.config(_IP, _gateway, _subnet, _dns1, _dns2);
 	}
 	WiFi.mode(_mode);
-	WiFi.persistent(false);
 #ifdef ARDUINO_ARCH_ESP32
 	// scan all networks and select best RSSI
 	WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);
@@ -150,10 +149,10 @@ void BasicWiFi::disconnect() {
 	if (_status >= wifi_connected) {
 		_wifiDisconnectDelay.once(DISCONNECT_DELAY, []() {
 			BASIC_WIFI_PRINTLN("disconnecting");
-			WiFi.disconnect(true);
+			WiFi.disconnect();
 		});
 	} else {
-		WiFi.disconnect(true);
+		WiFi.disconnect();
 	}
 	_shouldBeConnected = false;
 }
