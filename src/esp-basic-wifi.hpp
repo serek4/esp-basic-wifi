@@ -79,13 +79,13 @@ class BasicWiFi {
 	};
 
 	BasicWiFi(const char* ssid, const char* pass);
-	BasicWiFi(const char* ssid, const char* pass, int mode);
-	BasicWiFi(const char* ssid, const char* pass, int mode, const char* IP, const char* subnet, const char* gateway, const char* dns1, const char* dns2);
+	BasicWiFi(const char* ssid, const char* pass, const char* IP, const char* subnet, const char* gateway, const char* dns1, const char* dns2);
 
 	void setConfig(BasicWiFi::Config config);
 	void getConfig(BasicWiFi::Config& config);
 	Config getConfig();
 	void addLogger(void (*logger)(String logLevel, String msg));
+	void setMode(WiFiMode_t mode);
 	void setup();
 	void setWaitingFunction(void (*connectingIndicator)(u_long onTime, u_long offTime));
 	int8_t waitForConnection(int waitTime = DEFAULT_CONNECTION_WAIT_TIME);

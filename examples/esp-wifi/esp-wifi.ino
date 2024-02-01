@@ -19,6 +19,7 @@ void setup() {
 	wifi.onConnected(handleWiFiConnected);
 	wifi.onGotIP(handleWiFiGotIP);
 	wifi.onDisconnected(handleWiFiDisconnected);
+	wifi.setMode(WIFI_STA);
 	wifi.setup();
 	if (wifi.waitForConnection() >= BasicWiFi::wifi_got_ip) {
 	}

@@ -18,17 +18,8 @@ BasicWiFi::BasicWiFi(const char* ssid, const char* pass)
 	_ssid = ssid;
 	_pass = pass;
 }
-BasicWiFi::BasicWiFi(const char* ssid, const char* pass, int mode)
-    : _mode(static_cast<WiFiMode_t>(mode))
-    , _staticIP(false)
-    , _status(wifi_idle)
-    , _connectingIndicator(nullptr)
-    , _logger(nullptr) {
-	_ssid = ssid;
-	_pass = pass;
-}
-BasicWiFi::BasicWiFi(const char* ssid, const char* pass, int mode, const char* IP, const char* subnet, const char* gateway, const char* dns1, const char* dns2)
-    : _mode(static_cast<WiFiMode_t>(mode))
+BasicWiFi::BasicWiFi(const char* ssid, const char* pass, const char* IP, const char* subnet, const char* gateway, const char* dns1, const char* dns2)
+    : _mode(DEFAULT_WIFI_MODE)
     , _staticIP(true)
     , _status(wifi_idle)
     , _connectingIndicator(nullptr)
@@ -88,6 +79,9 @@ BasicWiFi::Config BasicWiFi::getConfig() {
 }
 void BasicWiFi::addLogger(void (*logger)(String logLevel, String msg)) {
 	_logger = logger;
+}
+void BasicWiFi::setMode(WiFiMode_t mode) {
+	_mode = mode;
 }
 void BasicWiFi::setup() {
 	WiFi.persistent(false);
