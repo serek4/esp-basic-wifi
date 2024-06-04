@@ -9,7 +9,7 @@
 #include <esp-basic-time.hpp>
 #include <functional>
 #include <map>
-#include <vector>
+#include <list>
 
 // #define BASIC_WIFI_DEBUG
 // debug printing macros
@@ -123,9 +123,9 @@ class BasicWiFi {
 #endif
 	int8_t _status;
 	static bool _shouldBeConnected;
-	std::vector<OnConnectHandler> _onConnectHandlers;
-	std::vector<OnGotIPHandler> _onGotIPHandlers;
-	std::vector<OnDisconnectHandler> _onDisconnectHandlers;
+	std::list<OnConnectHandler> _onConnectHandlers;
+	std::list<OnGotIPHandler> _onGotIPHandlers;
+	std::list<OnDisconnectHandler> _onDisconnectHandlers;
 
 	void _onConnected(CONNECTED_HANDLER_ARGS);
 	void _onGotIP(GOT_IP_HANDLER_ARGS);
