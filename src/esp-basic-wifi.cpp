@@ -97,8 +97,7 @@ void BasicWiFi::setup() {
 	WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);
 	WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL);
 #endif
-	WiFi.begin(_ssid, _pass);
-	_shouldBeConnected = true;
+	connect();
 #ifdef ARDUINO_ARCH_ESP32
 	WiFi.onEvent([&](WiFiEvent_t event, WiFiEventInfo_t info) { _onConnected(event, info); }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
 	WiFi.onEvent([&](WiFiEvent_t event, WiFiEventInfo_t info) { _onGotIP(event, info); }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
@@ -130,11 +129,13 @@ int8_t BasicWiFi::waitForConnection(int waitTime) {
 	return _status;
 }
 void BasicWiFi::connect() {
+	if (_logger != nullptr) { (*_logger)("wifi", "connecting WiFi"); }
 	WiFi.begin(_ssid, _pass);
 	_shouldBeConnected = true;
 }
 void BasicWiFi::reconnect(uint8_t reconnectDelay) {
 	disconnect();
+	if (_logger != nullptr) { (*_logger)("wifi", "WiFi reconnect in: " + String(reconnectDelay) + "s"); }
 	_wifiReconnectTimer.attach(reconnectDelay, []() {
 		BASIC_WIFI_PRINTLN("reconnecting");
 		connect();
