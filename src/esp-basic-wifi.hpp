@@ -94,7 +94,7 @@ class BasicWiFi {
 	void onConnected(const OnConnectHandler& handler);
 	void onGotIP(const OnGotIPHandler& handler);
 	void onDisconnected(const OnDisconnectHandler& handler);
-	static void connect();
+	void connect();
 	void reconnect(uint8_t reconnectDelay = DEFAULT_RECONNECT_DELAY);
 	void disconnect();
 	void addAccessPoint(const AccessPoint& accessPoint);
@@ -103,8 +103,8 @@ class BasicWiFi {
 	String accessPointName(const String& bssidStr = WiFi.BSSIDstr());
 
   private:
-	static String _ssid;
-	static String _pass;
+	String _ssid;
+	String _pass;
 	WiFiMode_t _mode;
 	bool _staticIP;
 	IPAddress _IP;
@@ -122,7 +122,7 @@ class BasicWiFi {
 	const char* _wifiStatus[8] = {"IDLE_STATUS", "NO_SSID_AVAIL", "SCAN_COMPLETED", "CONNECTED", "CONNECT_FAILED", "CONNECTION_LOST", "WRONG_PASSWORD", "DISCONNECTED"};
 #endif
 	int8_t _status;
-	static bool _shouldBeConnected;
+	bool _shouldBeConnected;
 	std::list<OnConnectHandler> _onConnectHandlers;
 	std::list<OnGotIPHandler> _onGotIPHandlers;
 	std::list<OnDisconnectHandler> _onDisconnectHandlers;

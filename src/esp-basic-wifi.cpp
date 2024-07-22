@@ -5,18 +5,16 @@ WiFiEventHandler _WiFiConnectedHandler, _WiFiGotIpHandler, _WiFiDisconnectedHand
 #endif
 Ticker _wifiReconnectTimer;
 Ticker _wifiDisconnectDelay;
-String BasicWiFi::_ssid;
-String BasicWiFi::_pass;
-bool BasicWiFi::_shouldBeConnected = false;
 
 BasicWiFi::BasicWiFi(const char* ssid, const char* pass)
     : _mode(DEFAULT_WIFI_MODE)
     , _staticIP(false)
     , _status(wifi_idle)
+    , _shouldBeConnected(false)
     , _connectingIndicator(nullptr)
-    , _logger(nullptr) {
-	_ssid = ssid;
-	_pass = pass;
+    , _logger(nullptr)
+    , _ssid(ssid)
+    , _pass(pass) {
 }
 
 void BasicWiFi::onConnected(const OnConnectHandler& handler) {
@@ -136,7 +134,7 @@ void BasicWiFi::connect() {
 void BasicWiFi::reconnect(uint8_t reconnectDelay) {
 	disconnect();
 	if (_logger != nullptr) { (*_logger)("wifi", "WiFi reconnect in: " + String(reconnectDelay) + "s"); }
-	_wifiReconnectTimer.attach(reconnectDelay, []() {
+	_wifiReconnectTimer.attach(reconnectDelay, [&]() {
 		BASIC_WIFI_PRINTLN("reconnecting");
 		connect();
 	});
