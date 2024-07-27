@@ -128,6 +128,9 @@ int8_t BasicWiFi::waitForConnection(int waitTime) {
 }
 void BasicWiFi::connect() {
 	if (_logger != nullptr) { (*_logger)("wifi", "connecting WiFi"); }
+#ifdef ARDUINO_ARCH_ESP32
+	WiFi.bandwidth(WIFI_BW_HT20);
+#endif
 	WiFi.begin(_ssid, _pass);
 	_shouldBeConnected = true;
 }
