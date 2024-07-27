@@ -206,6 +206,6 @@ void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
 	_status = wifi_disconnected;
 	BASIC_WIFI_PRINTLN("WiFi disconnected");
 	if (_logger != nullptr) { (*_logger)("wifi", "WiFi disconnected [" + String(_wifiStatus[WiFi.status()]) + "]"); }
-	if (_shouldBeConnected) { reconnect(AUTO_RECONNECT_DELAY); }
+	if (_shouldBeConnected && !_wifiReconnectTimer.active()) { reconnect(AUTO_RECONNECT_DELAY); }
 	for (const auto& handler : _onDisconnectHandlers) handler(HANDLER_ARGS);
 }
