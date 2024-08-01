@@ -8,8 +8,8 @@
 #include <Ticker.h>
 #include <esp-basic-time.hpp>
 #include <functional>
-#include <map>
 #include <list>
+#include <map>
 
 // #define BASIC_WIFI_DEBUG
 // debug printing macros
@@ -97,6 +97,7 @@ class BasicWiFi {
 	void connect();
 	void reconnect(uint8_t reconnectDelay = DEFAULT_RECONNECT_DELAY);
 	void disconnect();
+	void setAutoReconnectDelay(uint16_t delay);
 	void addAccessPoint(const AccessPoint& accessPoint);
 	void addAccessPoints(const AccessPoints& accessPoints);
 	void setAccessPoints(const AccessPoints& accessPoints);
@@ -121,6 +122,7 @@ class BasicWiFi {
 #elif defined(ARDUINO_ARCH_ESP8266)
 	const char* _wifiStatus[8] = {"IDLE_STATUS", "NO_SSID_AVAIL", "SCAN_COMPLETED", "CONNECTED", "CONNECT_FAILED", "CONNECTION_LOST", "WRONG_PASSWORD", "DISCONNECTED"};
 #endif
+	uint16_t _autoReconnectDelay;
 	int8_t _status;
 	bool _shouldBeConnected;
 	std::list<OnConnectHandler> _onConnectHandlers;

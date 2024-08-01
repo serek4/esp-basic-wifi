@@ -9,6 +9,7 @@ Ticker _wifiDisconnectDelay;
 BasicWiFi::BasicWiFi(const char* ssid, const char* pass)
     : _mode(DEFAULT_WIFI_MODE)
     , _staticIP(false)
+    , _autoReconnectDelay(AUTO_RECONNECT_DELAY)
     , _status(wifi_idle)
     , _shouldBeConnected(false)
     , _connectingIndicator(nullptr)
@@ -155,6 +156,10 @@ void BasicWiFi::disconnect() {
 	_shouldBeConnected = false;
 }
 
+void BasicWiFi::setAutoReconnectDelay(uint16_t delay) {
+	_autoReconnectDelay = delay;
+}
+
 void BasicWiFi::addAccessPoint(const AccessPoint& accessPoint) {
 	_accessPointsMap.insert(accessPoint);
 }
@@ -206,6 +211,6 @@ void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
 	_status = wifi_disconnected;
 	BASIC_WIFI_PRINTLN("WiFi disconnected");
 	if (_logger != nullptr) { (*_logger)("wifi", "WiFi disconnected [" + String(_wifiStatus[WiFi.status()]) + "]"); }
-	if (_shouldBeConnected && !_wifiReconnectTimer.active()) { reconnect(AUTO_RECONNECT_DELAY); }
+	if (_shouldBeConnected && !_wifiReconnectTimer.active()) { reconnect(_autoReconnectDelay); }
 	for (const auto& handler : _onDisconnectHandlers) handler(HANDLER_ARGS);
 }
