@@ -195,22 +195,30 @@ bool BasicWiFi::checkDNS(const char* hostname) {
 	return true;
 }
 void BasicWiFi::_onConnected(CONNECTED_HANDLER_ARGS) {
-	BASIC_WIFI_PRINTLN("WiFi connected!\n SSID: " + WiFi.SSID());
-	if (_logger != nullptr) { (*_logger)("wifi", "WiFi connected to: " + WiFi.SSID() + " [AP: " + accessPointName() + "]"); }
+	String logMsg = "WiFi connected to: " + WiFi.SSID() + " [AP: " + accessPointName() + "]";
+	BASIC_WIFI_PRINTLN(logMsg);
+	if (_logger != nullptr) { (*_logger)("wifi", logMsg); }
 	_status = wifi_connected;
 	for (const auto& handler : _onConnectHandlers) handler(HANDLER_ARGS);
 }
 void BasicWiFi::_onGotIP(GOT_IP_HANDLER_ARGS) {
 	_status = wifi_got_ip;
 	_wifiReconnectTimer.detach();
-	BASIC_WIFI_PRINTLN(" IP:   " + WiFi.localIP().toString());
-	if (_logger != nullptr) { (*_logger)("wifi", "got IP [" + (WiFi.localIP()).toString() + "]"); }
+	String logMsg = "got IP [" + (WiFi.localIP()).toString() + "]";
+	BASIC_WIFI_PRINTLN(logMsg);
+	if (_logger != nullptr) { (*_logger)("wifi", logMsg); }
 	for (const auto& handler : _onGotIPHandlers) handler(HANDLER_ARGS);
 }
 void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
 	_status = wifi_disconnected;
-	BASIC_WIFI_PRINTLN("WiFi disconnected");
-	if (_logger != nullptr) { (*_logger)("wifi", "WiFi disconnected [" + String(_wifiStatus[WiFi.status()]) + "]"); }
+	String logMsg = "WiFi disconnected [" + String(_wifiStatus[WiFi.status()]) + "]";
+#ifdef ARDUINO_ARCH_ESP32
+	logMsg += " reason: " + String(WiFi.disconnectReasonName((wifi_err_reason_t)info.wifi_sta_disconnected.reason));
+#elif defined(ARDUINO_ARCH_ESP8266)
+	logMsg += " reason: " + String(evt.reason);
+#endif
+	BASIC_WIFI_PRINTLN(logMsg);
+	if (_logger != nullptr) { (*_logger)("wifi", logMsg); }
 	if (_shouldBeConnected && !_wifiReconnectTimer.active()) { reconnect(_autoReconnectDelay); }
 	for (const auto& handler : _onDisconnectHandlers) handler(HANDLER_ARGS);
 }
