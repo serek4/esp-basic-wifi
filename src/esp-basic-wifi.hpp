@@ -103,6 +103,9 @@ class BasicWiFi {
 	void setAccessPoints(const AccessPoints& accessPoints);
 	String accessPointName(const String& bssidStr = WiFi.BSSIDstr());
 	String statusName(wl_status_t status = WiFi.status());
+#if defined(ARDUINO_ARCH_ESP8266)
+	const char* disconnectReasonName(WiFiDisconnectReason reason);
+#endif
 
   private:
 	String _ssid;
