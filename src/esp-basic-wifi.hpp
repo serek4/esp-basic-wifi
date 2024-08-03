@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef ARDUINO_ARCH_ESP32
+#if defined(ARDUINO_ARCH_ESP32)
 #include <WiFi.h>
 #elif defined(ARDUINO_ARCH_ESP8266)
 #include <ESP8266WiFi.h>
@@ -39,7 +39,7 @@
 #define DEFAULT_WIFI_MODE WIFI_STA
 #define DEFAULT_CONNECTION_WAIT_TIME 10
 
-#ifdef ARDUINO_ARCH_ESP32
+#if defined(ARDUINO_ARCH_ESP32)
 #define CONNECTED_HANDLER_ARGS const WiFiEvent_t event, WiFiEventInfo_t info
 #define GOT_IP_HANDLER_ARGS const WiFiEvent_t event, WiFiEventInfo_t info
 #define DISCONNECTED_HANDLER_ARGS const WiFiEvent_t event, WiFiEventInfo_t info
@@ -102,6 +102,7 @@ class BasicWiFi {
 	void addAccessPoints(const AccessPoints& accessPoints);
 	void setAccessPoints(const AccessPoints& accessPoints);
 	String accessPointName(const String& bssidStr = WiFi.BSSIDstr());
+	String statusName(wl_status_t status = WiFi.status());
 
   private:
 	String _ssid;
@@ -117,11 +118,6 @@ class BasicWiFi {
 	void (*_logger)(String logLevel, String msg);
 
 	AccessPoints _accessPointsMap;    // BSSIDstr, access point name
-#ifdef ARDUINO_ARCH_ESP32
-	const char* _wifiStatus[7] = {"IDLE_STATUS", "NO_SSID_AVAIL", "SCAN_COMPLETED", "CONNECTED", "CONNECT_FAILED", "CONNECTION_LOST", "DISCONNECTED"};
-#elif defined(ARDUINO_ARCH_ESP8266)
-	const char* _wifiStatus[8] = {"IDLE_STATUS", "NO_SSID_AVAIL", "SCAN_COMPLETED", "CONNECTED", "CONNECT_FAILED", "CONNECTION_LOST", "WRONG_PASSWORD", "DISCONNECTED"};
-#endif
 	uint16_t _autoReconnectDelay;
 	int8_t _status;
 	bool _shouldBeConnected;

@@ -1,4 +1,5 @@
 #include "esp-basic-wifi.hpp"
+#include "enum-names.hpp"
 
 #if defined(ARDUINO_ARCH_ESP8266)
 WiFiEventHandler _WiFiConnectedHandler, _WiFiGotIpHandler, _WiFiDisconnectedHandler;
@@ -211,7 +212,7 @@ void BasicWiFi::_onGotIP(GOT_IP_HANDLER_ARGS) {
 }
 void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
 	_status = wifi_disconnected;
-	String logMsg = "WiFi disconnected [" + String(_wifiStatus[WiFi.status()]) + "]";
+	String logMsg = "WiFi disconnected [" + statusName() + "]";
 #ifdef ARDUINO_ARCH_ESP32
 	logMsg += " reason: " + String(WiFi.disconnectReasonName((wifi_err_reason_t)info.wifi_sta_disconnected.reason));
 #elif defined(ARDUINO_ARCH_ESP8266)
