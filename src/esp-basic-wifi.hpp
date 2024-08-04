@@ -44,11 +44,13 @@
 #define GOT_IP_HANDLER_ARGS const WiFiEvent_t event, WiFiEventInfo_t info
 #define DISCONNECTED_HANDLER_ARGS const WiFiEvent_t event, WiFiEventInfo_t info
 #define HANDLER_ARGS event, info
+#define NULL_IP_ADDR INADDR_NONE
 #elif defined(ARDUINO_ARCH_ESP8266)
 #define CONNECTED_HANDLER_ARGS const WiFiEventStationModeConnected& evt
 #define GOT_IP_HANDLER_ARGS const WiFiEventStationModeGotIP& evt
 #define DISCONNECTED_HANDLER_ARGS const WiFiEventStationModeDisconnected& evt
 #define HANDLER_ARGS evt
+#define NULL_IP_ADDR INADDR_ANY
 #endif
 
 using AccessPoint = std::pair<String, String>;
@@ -67,11 +69,11 @@ class BasicWiFi {
 		wifi_got_ip,
 	};
 	struct Config {
+		Config();
+		WiFiMode_t mode;
 		String ssid;
 		String pass;
-		WiFiMode_t mode;
-		bool staticIP;
-		IPAddress IP;
+		IPAddress ip;
 		IPAddress subnet;
 		IPAddress gateway;
 		IPAddress dns1;
@@ -81,7 +83,6 @@ class BasicWiFi {
 	BasicWiFi(const char* ssid, const char* pass);
 
 	void setConfig(BasicWiFi::Config config);
-	void getConfig(BasicWiFi::Config& config);
 	Config getConfig();
 	void addLogger(void (*logger)(String logLevel, String msg));
 	void setMode(WiFiMode_t mode);
@@ -108,15 +109,9 @@ class BasicWiFi {
 #endif
 
   private:
-	String _ssid;
-	String _pass;
-	WiFiMode_t _mode;
+	Config _config;
+
 	bool _staticIP;
-	IPAddress _IP;
-	IPAddress _subnet;
-	IPAddress _gateway;
-	IPAddress _dns1;
-	IPAddress _dns2;
 	void (*_connectingIndicator)(u_long onTime, u_long offTime);
 	void (*_logger)(String logLevel, String msg);
 

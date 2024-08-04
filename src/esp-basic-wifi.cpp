@@ -7,16 +7,26 @@ WiFiEventHandler _WiFiConnectedHandler, _WiFiGotIpHandler, _WiFiDisconnectedHand
 Ticker _wifiReconnectTimer;
 Ticker _wifiDisconnectDelay;
 
+BasicWiFi::Config::Config()
+    : mode(DEFAULT_WIFI_MODE)
+    , ssid("")
+    , pass("")
+    , ip(NULL_IP_ADDR)
+    , subnet(NULL_IP_ADDR)
+    , gateway(NULL_IP_ADDR)
+    , dns1(NULL_IP_ADDR)
+    , dns2(NULL_IP_ADDR) {
+}
+
 BasicWiFi::BasicWiFi(const char* ssid, const char* pass)
-    : _mode(DEFAULT_WIFI_MODE)
-    , _staticIP(false)
+    : _staticIP(false)
     , _autoReconnectDelay(AUTO_RECONNECT_DELAY)
     , _status(wifi_idle)
     , _shouldBeConnected(false)
     , _connectingIndicator(nullptr)
-    , _logger(nullptr)
-    , _ssid(ssid)
-    , _pass(pass) {
+    , _logger(nullptr) {
+	_config.ssid = ssid;
+	_config.pass = pass;
 }
 
 void BasicWiFi::onConnected(const OnConnectHandler& handler) {
@@ -29,69 +39,50 @@ void BasicWiFi::onDisconnected(const OnDisconnectHandler& handler) {
 	_onDisconnectHandlers.push_back(handler);
 }
 void BasicWiFi::setConfig(BasicWiFi::Config config) {
-	_ssid = config.ssid;
-	_pass = config.pass;
-	_mode = config.mode;
-	_staticIP = config.staticIP;
-	_IP = config.IP;
-	_subnet = config.subnet;
-	_gateway = config.gateway;
-	_dns1 = config.dns1;
-	_dns2 = config.dns2;
-}
-void BasicWiFi::getConfig(BasicWiFi::Config& config) {
-	config.ssid = _ssid;
-	config.pass = _pass;
-	config.mode = _mode;
-	config.staticIP = _staticIP;
-	config.IP = _IP;
-	config.subnet = _subnet;
-	config.gateway = _gateway;
-	config.dns1 = _dns1;
-	config.dns2 = _dns2;
+	_config.mode = config.mode;
+	_config.ssid = config.ssid;
+	_config.pass = config.pass;
+	if (config.ip != NULL_IP_ADDR && config.subnet != NULL_IP_ADDR) {
+		_staticIP = true;
+		_config.ip = config.ip;
+		_config.subnet = config.subnet;
+		_config.gateway = config.gateway;
+		_config.dns1 = config.dns1;
+		_config.dns2 = config.dns2;
+	}
 }
 BasicWiFi::Config BasicWiFi::getConfig() {
-	BasicWiFi::Config config;
-	config.ssid = _ssid;
-	config.pass = _pass;
-	config.mode = _mode;
-	config.staticIP = _staticIP;
-	config.IP = _IP;
-	config.subnet = _subnet;
-	config.gateway = _gateway;
-	config.dns1 = _dns1;
-	config.dns2 = _dns2;
-	return config;
+	return _config;
 }
 void BasicWiFi::addLogger(void (*logger)(String logLevel, String msg)) {
 	_logger = logger;
 }
 void BasicWiFi::setMode(WiFiMode_t mode) {
-	_mode = mode;
+	_config.mode = mode;
 }
-void BasicWiFi::setStaticIP(IPAddress IP, IPAddress subnet, IPAddress gateway, IPAddress dns1, IPAddress dns2) {
+void BasicWiFi::setStaticIP(IPAddress ip, IPAddress subnet, IPAddress gateway, IPAddress dns1, IPAddress dns2) {
 	_staticIP = true;
-	_IP = IP;
-	_subnet = subnet;
-	_gateway = gateway;
-	_dns1 = dns1;
-	_dns2 = dns2;
+	_config.ip = ip;
+	_config.subnet = subnet;
+	_config.gateway = gateway;
+	_config.dns1 = dns1;
+	_config.dns2 = dns2;
 }
-void BasicWiFi::setStaticIP(const char* IP, const char* subnet, const char* gateway, const char* dns1, const char* dns2) {
+void BasicWiFi::setStaticIP(const char* ip, const char* subnet, const char* gateway, const char* dns1, const char* dns2) {
 	_staticIP = true;
-	_IP.fromString(IP);
-	_subnet.fromString(subnet);
-	_gateway.fromString(gateway);
-	_dns1.fromString(dns1);
-	_dns2.fromString(dns2);
+	_config.ip.fromString(ip);
+	_config.subnet.fromString(subnet);
+	_config.gateway.fromString(gateway);
+	_config.dns1.fromString(dns1);
+	_config.dns2.fromString(dns2);
 }
 void BasicWiFi::setup() {
 	WiFi.persistent(false);
 	WiFi.setAutoReconnect(false);
 	if (_staticIP) {
-		WiFi.config(_IP, _gateway, _subnet, _dns1, _dns2);
+		WiFi.config(_config.ip, _config.gateway, _config.subnet, _config.dns1, _config.dns2);
 	}
-	WiFi.mode(_mode);
+	WiFi.mode(_config.mode);
 #ifdef ARDUINO_ARCH_ESP32
 	// scan all networks and select best RSSI
 	WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);
@@ -133,7 +124,7 @@ void BasicWiFi::connect() {
 #ifdef ARDUINO_ARCH_ESP32
 	WiFi.bandwidth(WIFI_BW_HT20);
 #endif
-	WiFi.begin(_ssid, _pass);
+	WiFi.begin(_config.ssid, _config.pass);
 	_shouldBeConnected = true;
 }
 void BasicWiFi::reconnect(uint8_t reconnectDelay) {
