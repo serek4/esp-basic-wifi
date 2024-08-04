@@ -20,6 +20,8 @@ OnDisconnectHandler   KEYWORD1
 setConfig  KEYWORD2
 getConfig  KEYWORD2
 addLogger  KEYWORD2
+setMode  KEYWORD2
+setStaticIP  KEYWORD2
 setup  KEYWORD2
 setWaitingFunction   KEYWORD2
 waitForConnection   KEYWORD2
@@ -29,6 +31,13 @@ onDisconnected   KEYWORD2
 connect   KEYWORD2
 reconnect   KEYWORD2
 disconnect   KEYWORD2
+setAutoReconnectDelay   KEYWORD2
+accessPointName   KEYWORD2
+addAccessPoint   KEYWORD2
+addAccessPoints   KEYWORD2
+setAccessPoints   KEYWORD2
+statusName   KEYWORD2
+disconnectReasonName   KEYWORD2
 
 #######################################
 # (KEYWORD3)
