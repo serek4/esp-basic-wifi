@@ -206,8 +206,10 @@ void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
 	String logMsg = "WiFi disconnected [" + statusName() + "]";
 #ifdef ARDUINO_ARCH_ESP32
 	logMsg += " reason: " + String(WiFi.disconnectReasonName((wifi_err_reason_t)info.wifi_sta_disconnected.reason));
+	logMsg += " " + String(info.wifi_sta_disconnected.reason);
 #elif defined(ARDUINO_ARCH_ESP8266)
 	logMsg += " reason: " + String(disconnectReasonName(evt.reason));
+	logMsg += " " + String(evt.reason);
 #endif
 	BASIC_WIFI_PRINTLN(logMsg);
 	_log(logMsg, BasicLogs::_info_);
