@@ -195,7 +195,7 @@ void BasicWiFi::_onConnected(CONNECTED_HANDLER_ARGS) {
 }
 void BasicWiFi::_onGotIP(GOT_IP_HANDLER_ARGS) {
 	_status = wifi_got_ip;
-	_wifiReconnectTimer.detach();
+	if (_shouldBeConnected) { _wifiReconnectTimer.detach(); }
 	String logMsg = "got IP [" + (WiFi.localIP()).toString() + "]";
 	BASIC_WIFI_PRINTLN(logMsg);
 	_log(logMsg, BasicLogs::_info_);
