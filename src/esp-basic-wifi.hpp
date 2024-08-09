@@ -6,7 +6,7 @@
 #include <ESP8266WiFi.h>
 #endif
 #include <Ticker.h>
-#include <esp-basic-time.hpp>
+#include <esp-basic-logs.hpp>
 #include <functional>
 #include <list>
 #include <map>
@@ -84,7 +84,7 @@ class BasicWiFi {
 
 	void setConfig(BasicWiFi::Config config);
 	Config getConfig();
-	void addLogger(void (*logger)(String logLevel, String msg));
+	void addLogger(void (*logger)(uint8_t logLevel, String origin, String msg));
 	void setMode(WiFiMode_t mode);
 	void setStaticIP(IPAddress IP, IPAddress subnet, IPAddress gateway, IPAddress dns1, IPAddress dns2);
 	void setStaticIP(const char* IP, const char* subnet, const char* gateway, const char* dns1, const char* dns2);
@@ -113,7 +113,7 @@ class BasicWiFi {
 
 	bool _staticIP;
 	void (*_connectingIndicator)(u_long onTime, u_long offTime);
-	void (*_logger)(String logLevel, String msg);
+	void (*_logger)(uint8_t logLevel, String origin, String msg);
 
 	AccessPoints _accessPointsMap;    // BSSIDstr, access point name
 	uint16_t _autoReconnectDelay;
@@ -126,4 +126,6 @@ class BasicWiFi {
 	void _onConnected(CONNECTED_HANDLER_ARGS);
 	void _onGotIP(GOT_IP_HANDLER_ARGS);
 	void _onDisconnected(DISCONNECTED_HANDLER_ARGS);
+
+	void _log(String message, uint8_t logLevel = BasicLogs::_none_);
 };

@@ -54,7 +54,7 @@ void BasicWiFi::setConfig(BasicWiFi::Config config) {
 BasicWiFi::Config BasicWiFi::getConfig() {
 	return _config;
 }
-void BasicWiFi::addLogger(void (*logger)(String logLevel, String msg)) {
+void BasicWiFi::addLogger(void (*logger)(uint8_t logLevel, String origin, String msg)) {
 	_logger = logger;
 }
 void BasicWiFi::setMode(WiFiMode_t mode) {
@@ -120,7 +120,7 @@ int8_t BasicWiFi::waitForConnection(int waitTime) {
 	return _status;
 }
 void BasicWiFi::connect() {
-	if (_logger != nullptr) { (*_logger)("wifi", "connecting WiFi"); }
+	_log("connecting WiFi", BasicLogs::_info_);
 #ifdef ARDUINO_ARCH_ESP32
 	WiFi.bandwidth(WIFI_BW_HT20);
 #endif
@@ -129,7 +129,7 @@ void BasicWiFi::connect() {
 }
 void BasicWiFi::reconnect(uint8_t reconnectDelay) {
 	disconnect();
-	if (_logger != nullptr) { (*_logger)("wifi", "WiFi reconnect in: " + String(reconnectDelay) + "s"); }
+	_log("WiFi reconnect in: " + String(reconnectDelay) + "s", BasicLogs::_info_);
 	_wifiReconnectTimer.attach(reconnectDelay, [&]() {
 		BASIC_WIFI_PRINTLN("reconnecting");
 		connect();
@@ -189,7 +189,7 @@ bool BasicWiFi::checkDNS(const char* hostname) {
 void BasicWiFi::_onConnected(CONNECTED_HANDLER_ARGS) {
 	String logMsg = "WiFi connected to: " + WiFi.SSID() + " [AP: " + accessPointName() + "]";
 	BASIC_WIFI_PRINTLN(logMsg);
-	if (_logger != nullptr) { (*_logger)("wifi", logMsg); }
+	_log(logMsg, BasicLogs::_info_);
 	_status = wifi_connected;
 	for (const auto& handler : _onConnectHandlers) handler(HANDLER_ARGS);
 }
@@ -198,7 +198,7 @@ void BasicWiFi::_onGotIP(GOT_IP_HANDLER_ARGS) {
 	_wifiReconnectTimer.detach();
 	String logMsg = "got IP [" + (WiFi.localIP()).toString() + "]";
 	BASIC_WIFI_PRINTLN(logMsg);
-	if (_logger != nullptr) { (*_logger)("wifi", logMsg); }
+	_log(logMsg, BasicLogs::_info_);
 	for (const auto& handler : _onGotIPHandlers) handler(HANDLER_ARGS);
 }
 void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
@@ -210,7 +210,11 @@ void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
 	logMsg += " reason: " + String(disconnectReasonName(evt.reason));
 #endif
 	BASIC_WIFI_PRINTLN(logMsg);
-	if (_logger != nullptr) { (*_logger)("wifi", logMsg); }
+	_log(logMsg, BasicLogs::_info_);
 	if (_shouldBeConnected && !_wifiReconnectTimer.active()) { reconnect(_autoReconnectDelay); }
 	for (const auto& handler : _onDisconnectHandlers) handler(HANDLER_ARGS);
+}
+
+void BasicWiFi::_log(String message, uint8_t logLevel) {
+	if (_logger != nullptr) { (*_logger)(logLevel, "wifi", message); }
 }
