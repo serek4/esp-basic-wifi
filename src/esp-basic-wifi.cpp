@@ -193,8 +193,12 @@ void BasicWiFi::_onConnected(CONNECTED_HANDLER_ARGS) {
 	_status = wifi_connected;
 	if (_shouldBeConnected) {
 		for (const auto& handler : _onConnectHandlers) handler(HANDLER_ARGS);
-	} else if (!_wifiReconnectTimer.active()) {
-		reconnect(_autoReconnectDelay);
+	} else {
+		if (_wifiReconnectTimer.active()) {
+			WiFi.disconnect();
+		} else {
+			reconnect(_autoReconnectDelay);
+		}
 	}
 }
 void BasicWiFi::_onGotIP(GOT_IP_HANDLER_ARGS) {
