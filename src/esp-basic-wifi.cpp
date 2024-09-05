@@ -191,15 +191,25 @@ void BasicWiFi::_onConnected(CONNECTED_HANDLER_ARGS) {
 	BASIC_WIFI_PRINTLN(logMsg);
 	_log(logMsg, BasicLogs::_info_);
 	_status = wifi_connected;
-	for (const auto& handler : _onConnectHandlers) handler(HANDLER_ARGS);
+	if (_shouldBeConnected) {
+		for (const auto& handler : _onConnectHandlers) handler(HANDLER_ARGS);
+	} else {
+		if (_wifiReconnectTimer.active()) {
+			WiFi.disconnect();
+		} else {
+			reconnect(_autoReconnectDelay);
+		}
+	}
 }
 void BasicWiFi::_onGotIP(GOT_IP_HANDLER_ARGS) {
 	_status = wifi_got_ip;
-	_wifiReconnectTimer.detach();
 	String logMsg = "got IP [" + (WiFi.localIP()).toString() + "]";
 	BASIC_WIFI_PRINTLN(logMsg);
 	_log(logMsg, BasicLogs::_info_);
-	for (const auto& handler : _onGotIPHandlers) handler(HANDLER_ARGS);
+	if (_shouldBeConnected) {
+		_wifiReconnectTimer.detach();
+		for (const auto& handler : _onGotIPHandlers) handler(HANDLER_ARGS);
+	}
 }
 void BasicWiFi::_onDisconnected(DISCONNECTED_HANDLER_ARGS) {
 	_status = wifi_disconnected;
