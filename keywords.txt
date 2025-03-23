@@ -19,7 +19,6 @@ OnDisconnectHandler   KEYWORD1
 
 setConfig  KEYWORD2
 getConfig  KEYWORD2
-addLogger  KEYWORD2
 setMode  KEYWORD2
 setStaticIP  KEYWORD2
 setup  KEYWORD2
